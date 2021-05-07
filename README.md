@@ -1,6 +1,6 @@
 # ArchPie Installer
 ---
-##Arch Linux Installer For Rasperry PI
+## Arch Linux Installer For Rasperry PI
 ---
 ### Current Version: 0.1-Alpha
 ---
