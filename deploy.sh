@@ -6,6 +6,8 @@ application_title="ArchPie Linux V0.1-Alpha"
 rasp_pi_version=""
 quit_mode=0
 
+declare -a disks
+
 echo $application_title
 echo ""
 
@@ -32,6 +34,38 @@ download_image(){
 	wget --no-verbose "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi$rasp_pi_version-latest.tar.gz" -O arch_image.tar.gz
 }
 
+
+confirm_disk_formation(){
+	echo "DISK FORMAT"
+}
+
+get_disks(){
+	#Get all the disks and filter the uselless partitions.
+	disk_list=$(sudo fdisk -l | grep "Disk /" | grep -v "/loop" | grep -v "/mapper/" | sort)
+
+	# Syntax to replace all occurrences of ": " with " "
+	disk_separation=(${disk_list//": "/ })
+	index=0
+	for val in "${disk_separation[@]}";
+	do
+		if [[ "$val" == *"/dev/"* ]];then
+			disks+=("$val")
+			index=`expr $index + 1`
+		fi
+	done
+}
+
+choose_disks(){
+	dialog --title "$TITLE" --infobox 'Detecting Disks...' 10 50 &
+	get_disks
+	index=0
+	for val in "${disks[@]}";
+	do
+		echo "$val"
+	done
+
+}
+
 unpack_image(){
 	dialog --title "$application_title" --gauge "Unpack Image..." 0 0 40 &
 	mkdir root
@@ -42,7 +76,7 @@ unpack_image(){
 
 	# Replace the bsdtar dependency with the "tar" dependency.
 
-	tar -xpsf arch_image.tar.gz -C root/
+	tar -xpsf arch_image.tar.gz -C root
 
 	# Exit Sudo Mode
 	exit
@@ -53,7 +87,7 @@ unpack_image(){
 select_rasp_pi_version(){
 	version=$( dialog --stdout --title "$application_title" --radiolist "Select the raspberry pi version." \
 		0 0 0 \
-		RPI1 'Raspberry PI' on \
+		RPI1 'Raspberry PI 1/Zero' on \
 		RPI2 'Raspbperry PI 2' off \
 		RPI3 'Raspberry PI 3' off \
 		RPI4 'Raspberry PI 4' off )
@@ -70,11 +104,12 @@ select_rasp_pi_version(){
 }
 
 init_deployer(){
-	select_rasp_pi_version
-	if [ $quit_mode -eq 0 ]; then
-		download_image
-		unpack_image
-	fi
+	#select_rasp_pi_version
+	#if [ $quit_mode -eq 0 ]; then
+		#download_image
+		#unpack_image
+	#fi
+	choose_disks
 }
 
 
