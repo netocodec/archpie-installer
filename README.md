@@ -2,7 +2,7 @@
 ---
 ## Arch Linux Installer For Rasperry PI
 ---
-### Current Version: 0.1-Alpha
+### Current Version: 0.1-BETA
 ---
 
 #### What is ArchPie Installer?
@@ -12,10 +12,11 @@ SD Card and prepare it for the Rasperry PI.
 
 #### Current Objective
 
-Create a simple installer for the SD card!
+Create a console GUI for the deployer!
 
 
 
 ---
-Edit date: 07/05/2021
+Edit date: 10/05/2021
+
 Edited by: netocodec

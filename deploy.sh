@@ -40,7 +40,8 @@ confirm_disk_formation(){
 }
 
 get_disks(){
-	#Get all the disks and filter the uselless partitions.
+	# Get all the disks and filter the uselless partitions.
+	#disk_list=$(sudo fdisk -l | grep "Disk /" | grep -v "/loop" | grep -v "/mapper/" | grep -v "/ram" | sort)
 	disk_list=$(sudo fdisk -l | grep "Disk /" | grep -v "/loop" | grep -v "/mapper/" | sort)
 
 	# Syntax to replace all occurrences of ": " with " "
@@ -58,12 +59,34 @@ get_disks(){
 choose_disks(){
 	dialog --title "$TITLE" --infobox 'Detecting Disks...' 10 50 &
 	get_disks
-	index=0
-	for val in "${disks[@]}";
-	do
-		echo "$val"
-	done
 
+	if [ ${#disks[@]} -gt 0 ];then
+		index=0
+		declare -a disk_options
+		for val in "${disks[@]}";
+		do
+			if [ $index -eq 0 ];then
+				disk_options+=($index "$val" on)
+			else
+				disk_options+=($index "$val" off)
+			fi
+			index=`expr $index + 1`
+		done
+
+		choosen_disk=$( dialog --stdout --title "$application_title" --radiolist "Select the disk you want to deploy the OS." \
+			0 0 0 \
+			${disk_options[@]}) 
+
+		if [ "$choosen_disk" != "" ]; then
+			# Confirm the disk partition and format it!
+			echo "$choosen_disk"
+		else
+			clean_up
+		fi
+	else
+		dialog --title "$application_title" --msgbox "Cannot get any disk! Please check if you have any SD card plugged-in!" 0 0
+		clean_up
+	fi
 }
 
 unpack_image(){
@@ -106,8 +129,8 @@ select_rasp_pi_version(){
 init_deployer(){
 	#select_rasp_pi_version
 	#if [ $quit_mode -eq 0 ]; then
-		#download_image
-		#unpack_image
+	#download_image
+	#unpack_image
 	#fi
 	choose_disks
 }
