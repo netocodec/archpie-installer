@@ -7,6 +7,7 @@ rasp_pi_version=""
 quit_mode=0
 
 declare -a disks
+disk_index=-1
 
 echo $application_title
 echo ""
@@ -36,13 +37,16 @@ download_image(){
 
 
 confirm_disk_formation(){
-	echo "DISK FORMAT"
+	dialog --title "$application_title" --yesno "Are you shure you want to format ${disks[disk_index]}?" 0 0
+	if [ $? = 0 ];
+    then
+		echo "YES! $disk_index"
+	fi
 }
 
 get_disks(){
 	# Get all the disks and filter the uselless partitions.
-	#disk_list=$(sudo fdisk -l | grep "Disk /" | grep -v "/loop" | grep -v "/mapper/" | grep -v "/ram" | sort)
-	disk_list=$(sudo fdisk -l | grep "Disk /" | grep -v "/loop" | grep -v "/mapper/" | sort)
+	disk_list=$(sudo fdisk -l | grep "Disk /" | grep -v "/loop" | grep -v "/mapper/" | grep -v "/ram" | sort)
 
 	# Syntax to replace all occurrences of ": " with " "
 	disk_separation=(${disk_list//": "/ })
@@ -79,7 +83,8 @@ choose_disks(){
 
 		if [ "$choosen_disk" != "" ]; then
 			# Confirm the disk partition and format it!
-			echo "$choosen_disk"
+			disk_index=$choosen_disk
+			confirm_disk_formation
 		else
 			clean_up
 		fi
@@ -89,9 +94,8 @@ choose_disks(){
 	fi
 }
 
-unpack_image(){
+deploy_image(){
 	dialog --title "$application_title" --gauge "Unpack Image..." 0 0 40 &
-	mkdir root
 
 	# IN_DEVELOPMENT
 	# Enter Sudo Mode
@@ -105,6 +109,10 @@ unpack_image(){
 	exit
 	dialog --title "$application_title" --gauge "Syncronize Image..." 0 0 60 &
 	sync
+}
+
+format_partitions(){
+echo "Format Partions"
 }
 
 select_rasp_pi_version(){
