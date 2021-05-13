@@ -97,22 +97,16 @@ choose_disks(){
 deploy_image(){
 	dialog --title "$application_title" --gauge "Unpack Image..." 0 0 40 &
 
-	# IN_DEVELOPMENT
-	# Enter Sudo Mode
-	sudo su
-
 	# Replace the bsdtar dependency with the "tar" dependency.
+	# Using SU command to untar the image into the root partition of the SD card
+	sudo su -c "tar -xpsf arch_image.tar.gz -C root"
 
-	tar -xpsf arch_image.tar.gz -C root
-
-	# Exit Sudo Mode
-	exit
 	dialog --title "$application_title" --gauge "Syncronize Image..." 0 0 60 &
 	sync
 }
 
 format_partitions(){
-echo "Format Partions"
+echo "Format Partitions"
 }
 
 select_rasp_pi_version(){
